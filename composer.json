@@ -1,0 +1,36 @@
+{
+  "name": "bonecreative/google-conversions-api",
+  "description": "Laravel package boilerplate.",
+  "keywords": [
+    "laravel",
+    "package"
+  ],
+  "type": "laravel",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Tarek Adam",
+      "email": "tarek@fuqu.io"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "BoneCreative\\GoogleConversionsApi\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BoneCreative\\Test\\": "tests/"
+    }
+  },
+  "require": {},
+  "extra": {
+    "laravel": {
+      "providers": [
+        "BoneCreative\\GoogleConversionsApi\\ServiceProvider",
+        "BoneCreative\\GoogleConversionsApi\\EventServiceProvider"
+      ]
+    }
+  }
+}
