@@ -1,2 +1,4 @@
 <?php
-return [];
+return [
+	'GA_TRACKING_ID' => ''
+];
