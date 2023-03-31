@@ -1,4 +1,4 @@
 <?php
 return [
-	'GA_TRACKING_ID' => ''
+	'ga_tracking_id' => env('GA_TRACKING_ID')
 ];
