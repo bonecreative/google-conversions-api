@@ -1,2 +1,2 @@
 # google-conversions-api
-try versioning
+try versioning 2
