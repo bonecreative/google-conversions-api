@@ -6,51 +6,77 @@ use GuzzleHttp\Client as Guzzle;
 
 abstract class Client
 {
+	/**
+	 * @param $email
+	 * @param $amount
+	 * @return bool
+	 *
+	 * @see \Bonecreative\GoogleConversionsApi\Test\ClientTest::test_purchase
+	 */
 	public static function purchase($email, $amount)
 	{
-		$clientId      = hash('sha256', $email);
-		$transactionId = time();                                            // Replace with a unique transaction ID for each purchase
-		$currency      = config(ServiceProvider::SHORT_NAME . '.currency'); // Replace with your currency code
-		
-		$data = [
-			'v'   => '1', // Protocol version
-			'tid' => config(ServiceProvider::SHORT_NAME . '.tracking_id'), // Tracking ID (replace with your Google Analytics tracking ID)
-			'cid' => $clientId, // Client ID (a unique identifier for each user or session)
-			't'   => 'transaction', // Hit type (always set to 'transaction')
-			'ti'  => $transactionId, // Transaction ID (a unique ID for each transaction)
-			'tr'  => $amount, // Transaction revenue (the total amount of the transaction)
-			'cu'  => $currency, // Currency code (the currency used for the transaction)
+		$payload = [
+			'client_id' => hash('sha256', $email),
+			'events'    => [
+				[
+					'name'   => 'purchase',
+					'params' => [
+						'value'    => $amount,
+						'currency' => config(ServiceProvider::SHORT_NAME . '.currency'),
+					],
+				],
+			],
 		];
 		
-		return self::send($data);
+		return self::send($payload);
 	}
 	
+	/**
+	 * @param $email
+	 * @return bool
+	 * @see \Bonecreative\GoogleConversionsApi\Test\ClientTest::test_initiateCheckout
+	 */
 	public static function initiateCheckout($email)
 	{
-		$clientId = hash('sha256', $email);
-		
-		$data = [
-			'v'   => '1', // Protocol version
-			'tid' => config(ServiceProvider::SHORT_NAME . '.tracking_id'), // Tracking ID (replace with your Google Analytics tracking ID)
-			'cid' => $clientId, // Client ID (a unique identifier for each user or session)
-			't'   => 'event', // Hit type (always set to 'event')
-			'ec'  => 'checkout', // Event category (the category of the event)
-			'ea'  => 'initiate_checkout', // Event action (the action performed in the event)
+		$payload = [
+			'client_id' => hash('sha256', $email),
+			'events'    => [
+				[
+					'name'   => 'submit_form',
+					'params' => [
+						'form_name' => 'checkout',
+						'success'   => true
+					]
+				],
+			],
 		];
 		
-		return self::send($data);
+		return self::send($payload);
 	}
 	
-	private static function send($data)
+	/**
+	 * @param array $payload
+	 * @return bool
+	 */
+	public static function send(array $payload): bool
 	{
-		$client = new Guzzle([
-			                     'base_uri' => 'https://www.google-analytics.com',
-		                     ]);
+		$measurement_id = env('GA_TRACKING_ID');
+		$api_secret     = env('GA_API_SECRET');
 		
-		$response = $client->request('POST', '/collect', [
-			'form_params' => $data,
+		$json_payload = json_encode($payload);
+		
+		$client = new Guzzle([
+			                                 'base_uri' => 'https://www.google-analytics.com',
+		                                 ]);
+		
+		$response = $client->post('/mp/collect', [
+			'query' => [
+				'measurement_id' => $measurement_id,
+				'api_secret'     => $api_secret,
+			],
+			'body'  => $json_payload,
 		]);
 		
-		return ($response->getStatusCode() == 200);
+		return ($response->getStatusCode() == 204);
 	}
 }
