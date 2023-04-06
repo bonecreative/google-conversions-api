@@ -6,6 +6,13 @@ use GuzzleHttp\Client as Guzzle;
 
 abstract class Client
 {
+	/**
+	 * @param $email
+	 * @param $amount
+	 * @return bool
+	 *
+	 * @see \Bonecreative\GoogleConversionsApi\Test\ClientTest::test_purchase
+	 */
 	public static function purchase($email, $amount)
 	{
 		$clientId      = hash('sha256', $email);
@@ -25,6 +32,11 @@ abstract class Client
 		return self::send($data);
 	}
 	
+	/**
+	 * @param $email
+	 * @return bool
+	 * @see \Bonecreative\GoogleConversionsApi\Test\ClientTest::test_initiateCheckout
+	 */
 	public static function initiateCheckout($email)
 	{
 		$clientId = hash('sha256', $email);
@@ -47,7 +59,13 @@ abstract class Client
 			                     'base_uri' => 'https://www.google-analytics.com',
 		                     ]);
 		
+		$headers = [
+			"Authorization" => "Bearer " . config(ServiceProvider::SHORT_NAME . '.api_key'),
+			"Content-Type"  => "application/x-www-form-urlencoded",
+		];
+		
 		$response = $client->request('POST', '/collect', [
+			'headers'     => $headers,
 			'form_params' => $data,
 		]);
 		
